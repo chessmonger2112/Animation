@@ -1,0 +1,81 @@
+<html>
+    <canvas id = "c" width="1400" height="2000" ></canvas>
+    <button id="buttony">Button yoh</button>
+
+	<script>
+
+		var canvas = document.getElementById("c");
+    	context = canvas.getContext("2d");
+    	var PI = Math.PI;
+    	var TAU = 2*PI;
+		var theta = 3.73//PI/5;
+		var xI = 400;
+		var yI = 300;
+		var hPrime;
+		var fraction = 1/50;
+
+		function display(d)
+		{
+			var X = 200;
+			var H = 50;
+
+			var W2 = W*W;
+
+			var xPrime = X+d;
+			var d2 = d * d;
+			hPrime = H*X/xPrime;
+
+			var wPrime = Math.sqrt(W2-d2);
+
+			theta = theta%(TAU)
+
+				if ((theta>PI/2)&&(theta<PI*3/2))
+				{
+					wPrime*=-1;
+				}
+
+			point1 = {x:0,y:0};
+			point2 = {x:wPrime,y:0};
+
+			point3 = {x:0,y:H};
+			point4 = {x:wPrime,y:hPrime};
+
+			context.beginPath();
+		    context.moveTo(xI+point1.x,point1.y+yI);
+		    context.lineTo(xI+point2.x,point2.y+yI);
+		    context.stroke();
+		    context.closePath();
+
+		    context.beginPath();
+		    context.moveTo(xI+point3.x,point3.y+yI);
+		    context.lineTo(xI+point4.x,point4.y+yI);
+		    context.stroke();
+		    context.closePath();
+
+		    context.beginPath();
+		    context.moveTo(xI+point1.x,point1.y+yI);
+		    context.lineTo(xI+point3.x,point3.y+yI);
+		    context.stroke();
+		    context.closePath();
+
+		    context.beginPath();
+		    context.moveTo(xI+point2.x,point2.y+yI);
+		    context.lineTo(xI+point4.x,point4.y+yI);
+		    context.stroke();
+		    context.closePath();
+		}
+
+		function rotate()
+		{
+			W = 100;
+			var distance = 0;
+
+			theta+=PI*fraction;
+			distance = W*Math.sin(theta);
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			display(distance);
+		}
+
+		var interval = setInterval(rotate, 100);
+		buttony.addEventListener('click',function(){fraction = 0},false);
+	</script>
