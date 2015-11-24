@@ -109,6 +109,7 @@ imgTree.src = Tree;
 imgDock.src = Dock;
 imgOcean.src = Ocean;
 imgDuck.src = Duck;
+$("h3").hide();
 
 function treeFall()
 {
@@ -320,7 +321,8 @@ var IronMonger = function() {
                 var fire=FireballMonger(xPos,yPos,drLast);
                 fireBalls.push(fire);
                 shotsFired++;
-                document.getElementById("b5").innerHTML=shotsFired;
+                document.getElementById("b5").innerHTML = "Fireballs shot: " + shotsFired;
+
             }
         },
 
