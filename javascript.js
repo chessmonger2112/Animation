@@ -322,7 +322,6 @@ var IronMonger = function() {
                 fireBalls.push(fire);
                 shotsFired++;
                 document.getElementById("b5").innerHTML = "Fireballs shot: " + shotsFired;
-
             }
         },
 
