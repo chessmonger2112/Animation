@@ -555,29 +555,32 @@ var monger = IronMonger();
 var evil = Enemy(0,200);
 enemyBalls.push(evil);
 var enemy1=enemyBalls[0];
-
-var interval = setInterval(monger.update, 1000 / 600)
-$(document).on('keyup',function(e){
-
-    //console.log(e.keyCode);
-})
+var interval = setInterval(monger.update, 1000 / 600);
 
 $(document).on('keydown',function(e){
-    //console.log(e.keyCode);
-    if (e.keyCode === 65)
+    var key = e.keyCode;
+    if (key === 37)
     {
         monger.moveLeft();
     }
-    else if (e.keyCode===83)
+    else if (key === 39)
     {
         monger.moveRight();
     }
-    else if (e.keyCode===51)
+    else if (key === 32)
+    {
+      monger.shoot();
+    }
+    else if (key === 38)
+    {
+      monger.jump();
+    }
+    else if (key === 40)
+    {
+      monger.stop();
+    }
+    else if (key === 51)
     {
         mapCounter = 2;
     }
-})
-
-$('#bJump').on('click', monger.jump);
-$('#bStop').on('click', monger.stop);
-$('#bShoot').on('click', monger.shoot);
+});
