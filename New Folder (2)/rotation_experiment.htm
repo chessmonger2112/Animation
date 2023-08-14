@@ -1,43 +1,36 @@
 <html>
     <canvas id = "c" width="300" height="300" ></canvas>
-
 	<script>
-
 		var canvas = document.getElementById("c");
     	context = canvas.getContext("2d");
     	var PI = Math.PI;
-    	var TAU = 2*PI;
+    	var TAU = 2 * PI;
     	var walkRight = "walkingright1.jpg";
-
         var width = 150;
         var height = 100;
         var imgX = 50;
         var imgY = 50;
-
-        var tX = imgX + .5*width;
-        var tY = imgY + .5*height;
+        var tX = imgX + .5 * width;
+        var tY = imgY + .5 * height;
         var theta = 0;
 
     	var img1 = new Image();
 
     	img1.onload = function() {
-        	img1.src = walkRight;
-            context.drawImage(img1,imgX,imgY,width,height);
-            var interval = setInterval(rotate, 100);
-
+            // img1.src = walkRight; //why does this cause the browser to spin??
+            context.drawImage(img1, imgX, imgY, width, height);
+            var interval = setInterval(rotate, 1);
         }
     	img1.src = walkRight;
 
-        function rotate()
-        {
-            theta+=.1;
-
+        function rotate() {
+            theta += .002;
             context.clearRect(0, 0, canvas.width, canvas.height);
+
             context.translate(tX,tY);
             context.rotate(theta);
 
-           // context.drawImage(img1,-50,-50,100,100);
-            context.drawImage(img1,-.5*width,-.5*height,width,height);
+            context.drawImage(img1,-.5 * width, -.5 * height, width, height);
             context.rotate(-theta);
             context.translate(-tX,-tY);
         }
