@@ -1,16 +1,25 @@
-var Enemy=function(x1,y1)
-{
-var pos ={x:x1,y:y1,w:50,h:50};
+console.log("enemy js file");
+var Enemy = function(x, y) {
+var w = 50;
+var h = 50;
+
+var pos ={
+  x,
+  y,
+  w,
+  h
+};
+
 var speed = 5;
-var threshold=speed+1;
+var threshold = speed + 1;
 var exploded = false;
 
     function direction(coordinate, mongerCoordinate)
     {
-        var difference = mongerCoordinate-coordinate;
-        if (Math.abs(difference)>threshold)
+        var difference = mongerCoordinate - coordinate;
+        if (Math.abs(difference) > threshold)
         {
-            return difference/(Math.abs(difference));
+            return difference / (Math.abs(difference));
         }
 
         else
@@ -18,34 +27,34 @@ var exploded = false;
             return 0;
         }
     }
-    return{
+    return {
 
-        update: function(mongerX,mongerY)
+        update: function(mongerX, mongerY)
         {
-            var directionX = direction(pos.x,mongerX);
-            var directionY = direction(pos.y,mongerY);
+            var directionX = direction(pos.x, mongerX);
+            var directionY = direction(pos.y, mongerY);
 
-            if (!exploded)
+            if (exploded === false)
             {
-                pos.x+= speed * directionX;
-                pos.y+= speed * directionY;
+                pos.x += speed * directionX;
+                pos.y += speed * directionY;
 
-                if (directionX<0)
+                if (directionX < 0)
                 {
-                    img3.src=enemyPicLeft;
+                    enemyImg.src = enemyPicLeftFilePath;
                 }
-                else if (directionX>0)
+                else if (directionX > 0)
                 {
-                    img3.src=enemyPicRight;
+                    enemyImg.src = enemyPicRightFilePath;
                 }
-                if (Math.abs(pos.x-mongerX)<=threshold&&(Math.abs(pos.y-mongerY)<=threshold))
+                if (Math.abs(pos.x - mongerX) <= threshold && (Math.abs(pos.y - mongerY) <= threshold))
                 {
                     died();
                 }
             }
-            if (mapCounter===0)
+            if (mapCounter === 0) //This needs to be done better
             {
-                context.drawImage(img3,pos.x-.5*pos.h,pos.y-.5*pos.w,pos.w,pos.h);
+                context.drawImage(enemyImg, pos.x - .5 * pos.h, pos.y - .5 * pos.w, pos.w, pos.h);
             }
         },
         getCoordinates:function(){
@@ -53,7 +62,7 @@ var exploded = false;
         },
         died:function(){
             exploded=true;
-            img3.src=boom;
+            enemyImg.src=boomFilePath;
         },
         deadStatus: function(){
 
