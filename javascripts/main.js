@@ -35,7 +35,6 @@ var xPos = 900;
 var initialvelocity = 40;
 var groundCurrent = 0 ;
 var dx = 0;
-var dr = 0;
 var drLast = -3;
 var fireBalls = [];
 var enemyBalls = [];
@@ -135,8 +134,8 @@ var map5 = [
   {x: 1, y: 586},{x: 1, y: 584},{x: 1, y: 583},{x: 2, y: 580},{x: 4, y: 577},{x: 5, y: 575},{x: 6, y: 573},{x: 7, y: 570},{x: 8, y: 569},{x: 10, y: 564},{x: 12, y: 561},{x: 13, y: 558},{x: 15, y: 555},{x: 17, y: 552},{x: 19, y: 548},{x: 22, y: 544},{x: 26, y: 538},{x: 27, y: 535},{x: 30, y: 531},{x: 33, y: 526},{x: 35, y: 525},{x: 37, y: 522},{x: 40, y: 517},{x: 42, y: 514},{x: 43, y: 512},{x: 47, y: 508},{x: 50, y: 504},{x: 53, y: 501},{x: 56, y: 498},{x: 59, y: 495},{x: 63, y: 491},{x: 67, y: 487},{x: 77, y: 479},{x: 82, y: 475},{x: 87, y: 471},{x: 89, y: 469},{x: 97, y: 462},{x: 106, y: 454},{x: 112, y: 449},{x: 127, y: 437},{x: 133, y: 433},{x: 150, y: 424},{x: 156, y: 422},{x: 170, y: 413},{x: 174, y: 411},{x: 175, y: 410},{x: 179, y: 408},{x: 180, y: 407},{x: 183, y: 406},{x: 185, y: 404},{x: 187, y: 403},{x: 193, y: 400},{x: 194, y: 399},{x: 202, y: 397},{x: 206, y: 396},{x: 210, y: 394},{x: 216, y: 393},{x: 218, y: 392},{x: 223, y: 391},{x: 225, y: 390},{x: 227, y: 389},{x: 230, y: 389},{x: 231, y: 388},{x: 238, y: 386},{x: 243, y: 384},{x: 249, y: 382},{x: 256, y: 379},{x: 263, y: 376},{x: 268, y: 375},{x: 272, y: 373},{x: 286, y: 368},{x: 293, y: 365},{x: 300, y: 363},{x: 302, y: 362},{x: 309, y: 361},{x: 312, y: 360},{x: 313, y: 360},{x: 314, y: 360},{x: 315, y: 360},{x: 316, y: 360},{x: 318, y: 359},{x: 323, y: 358},{x: 329, y: 356},{x: 336, y: 353},{x: 342, y: 351},{x: 349, y: 348},{x: 357, y: 345},{x: 382, y: 335},{x: 385, y: 334},{x: 394, y: 330},{x: 401, y: 326},{x: 406, y: 325},{x: 413, y: 323},{x: 415, y: 322},{x: 421, y: 321},{x: 423, y: 320},{x: 426, y: 319},{x: 429, y: 318},{x: 434, y: 317},{x: 437, y: 316},{x: 439, y: 316},{x: 447, y: 313},{x: 451, y: 313},{x: 455, y: 312},{x: 461, y: 311},{x: 466, y: 310},{x: 475, y: 308},{x: 480, y: 307},{x: 491, y: 305},{x: 512, y: 299},{x: 532, y: 297},{x: 533, y: 297},{x: 540, y: 297},{x: 543, y: 297},{x: 545, y: 297},{x: 548, y: 297},{x: 551, y: 297},{x: 553, y: 297},{x: 556, y: 299},{x: 560, y: 301},{x: 563, y: 303},{x: 567, y: 305},{x: 580, y: 312},{x: 589, y: 318},{x: 594, y: 320},{x: 601, y: 326},{x: 602, y: 327},{x: 605, y: 328},{x: 606, y: 329},{x: 613, y: 335},{x: 615, y: 338},{x: 617, y: 340},{x: 618, y: 344},{x: 620, y: 352},{x: 620, y: 356},{x: 620, y: 358},{x: 620, y: 360},{x: 620, y: 369},{x: 617, y: 376},{x: 615, y: 379},{x: 614, y: 381},{x: 612, y: 382},{x: 610, y: 384},{x: 605, y: 388},{x: 598, y: 393},{x: 589, y: 402},{x: 586, y: 405},{x: 575, y: 413},{x: 572, y: 416},{x: 555, y: 425},{x: 552, y: 427},{x: 542, y: 432},{x: 531, y: 437},{x: 524, y: 440},{x: 518, y: 444},{x: 511, y: 450},{x: 508, y: 454},{x: 504, y: 459},{x: 502, y: 463},{x: 502, y: 465},{x: 502, y: 473},{x: 501, y: 480},{x: 501, y: 481},{x: 501, y: 482},{x: 503, y: 483},{x: 504, y: 484},{x: 509, y: 488},{x: 515, y: 492},{x: 520, y: 494},{x: 526, y: 497},{x: 531, y: 500},{x: 536, y: 502},{x: 541, y: 503},{x: 545, y: 505},{x: 550, y: 506},{x: 557, y: 507},{x: 560, y: 508},{x: 564, y: 509},{x: 569, y: 510},{x: 573, y: 511},{x: 582, y: 512},{x: 598, y: 514},{x: 611, y: 516},{x: 615, y: 517},{x: 619, y: 517},{x: 627, y: 517},{x: 630, y: 517},{x: 636, y: 517},{x: 646, y: 517},{x: 650, y: 517},{x: 660, y: 517},{x: 678, y: 516},{x: 689, y: 514},{x: 708, y: 511},{x: 716, y: 511},{x: 719, y: 510},{x: 721, y: 510},{x: 731, y: 508},{x: 736, y: 506},{x: 739, y: 506},{x: 745, y: 504},{x: 749, y: 502},{x: 750, y: 502},{x: 753, y: 501},{x: 756, y: 500},{x: 762, y: 497},{x: 770, y: 494},{x: 791, y: 489},{x: 801, y: 487},{x: 822, y: 484},{x: 843, y: 481},{x: 847, y: 480},{x: 850, y: 479},{x: 864, y: 476},{x: 878, y: 473},{x: 889, y: 471},{x: 896, y: 471},{x: 903, y: 470},{x: 906, y: 470},{x: 917, y: 468},{x: 922, y: 468},{x: 931, y: 467},{x: 934, y: 467},{x: 945, y: 467},{x: 955, y: 466},{x: 961, y: 466},{x: 970, y: 467},{x: 982, y: 469},{x: 988, y: 470},{x: 998, y: 473},{x: 1002, y: 474},{x: 1016, y: 477},{x: 1020, y: 478},{x: 1022, y: 479},{x: 1033, y: 481},{x: 1039, y: 482},{x: 1050, y: 486},{x: 1066, y: 491},{x: 1081, y: 497},{x: 1090, y: 500},{x: 1095, y: 502},{x: 1097, y: 503},{x: 1097, y: 503},{x: 1097, y: 503},{x: 1099, y: 503},{x: 1101, y: 503},{x: 1104, y: 504},{x: 1108, y: 505},{x: 1109, y: 505},{x: 1110, y: 505},{x: 1111, y: 505},{x: 1114, y: 505},{x: 1117, y: 505},{x: 1121, y: 505},{x: 1123, y: 505},{x: 1128, y: 506},{x: 1138, y: 507},{x: 1152, y: 509},{x: 1157, y: 509},{x: 1164, y: 510},{x: 1169, y: 510},{x: 1174, y: 510},{x: 1178, y: 510},{x: 1183, y: 511},{x: 1187, y: 511},{x: 1201, y: 512},{x: 1224, y: 514},{x: 1230, y: 515},{x: 1240, y: 516},{x: 1256, y: 517},{x: 1263, y: 517},{x: 1265, y: 521},{x: 1264, y: 521},{x: 1263, y: 521},{x: 1263, y: 521},{x: 1263, y: 521},{x: 1262, y: 521},{x: 1262, y: 521},{x: 1262, y: 521},{x: 1262, y: 521},
 ];
 
-var monger = IronMonger();
-var evil = Enemy(0, 200);
+var monger = new IronMonger();
+var evil = new Enemy(0, 200);
 enemyBalls.push(evil);
 var enemy1 = enemyBalls[0];
 myInterval = setInterval(updateEverything, 1000 / 60);
@@ -162,7 +161,7 @@ function updateMapCounter() {
       xPos = canvas.width;
     }
     else {
-        dr = 0;
+        dx = 0;
         $("#loseHeadline").text("You win!!!");
     }
   }
@@ -172,7 +171,7 @@ function updateMapCounter() {
       xPos = 0;
     }
   else if (mapCounter === 0) {
-    dr = 0;
+    dx = 0;
     }
   }
 }
@@ -391,7 +390,7 @@ function IronMonger() {
   var once = false;
   var aboveEnemy = false;
 
-  function uphill()
+  function uphill(dr)
   {
     var deltaVertGround = ground(xPos + dr) - yPos;
     var speedCache = Math.hypot(dr, deltaVertGround);
@@ -411,170 +410,160 @@ function IronMonger() {
     else {
       yPos += dyPrime;
     }
-
-    // console.log(yPos + dyPrime === newGroundHeight, (yPos + dyPrime).toFixed(11) === newGroundHeight.toFixed(11));
-
   }
 
-    function moveLateral ()
+  function moveLateral(dx)
+  {
+      xPos += dx;
+  }
+
+    this.x = function() {
+        return xPos;
+    },
+    this.y = function() {
+        return yPos;
+    },
+
+    this.fall = function() {
+    if (yCount === 0) //not sure why this is necessary
     {
-        xPos += dr;
+        dy = g * (.2 * t + 1) - v0y;
+        t ++;
     }
 
-    return {
-        x: function()
+    yCount = (yCount + 1) % yCountInterval;
+
+    xPos += dx;
+    yPos += dy;
+
+    var enemyPosition = enemy1.getCoordinates();
+    var enemyY = enemyPosition.y;
+
+    var isLanding = getIsLanding(xPos, yPos, aboveEnemy, enemyPosition);
+    aboveEnemy = getAboveEnemy(enemyPosition, xPos, yPos)
+
+    var groundHeight = ground(xPos);
+    var isBelowGround = yPos >= groundHeight;
+
+    if (isLanding) {
+      yPos = enemyY;
+    }
+
+    if (isLanding || isBelowGround) {
+      t = 0;
+      v0y = 0;
+    }
+
+    if (isBelowGround) {
+      yPos = groundHeight;
+    }
+  },
+
+  this.moveLeft = function() {
+    var enemyPos = enemy1.getCoordinates();
+    var isFalling = getIsFalling(enemyPos, xPos, yPos);
+    var onGround = !isFalling;
+
+    var isAbleToMoveLeft = onGround  && isAlive;
+      if (isAbleToMoveLeft)
+      {
+        dx = -xVelocity * deltaTime;
+        drLast = dx;
+      }
+  },
+   this.moveRight = function() {
+    var enemyPos = enemy1.getCoordinates();
+    var isFalling = getIsFalling(enemyPos, xPos, yPos);
+    var onGround = !isFalling;
+
+    var isAbleToMoveRight = onGround && isAlive;
+      if (isAbleToMoveRight)
+      {
+          dx = xVelocity * deltaTime;
+          drLast = dx;
+      }
+  },
+  this.jump = function() {
+      v0y = 15;
+      if (isAlive) {
+        yCount = 0;
+        monger.fall();
+      }
+  },
+  this.stop = function() {
+      if (isAlive) {
+          dx = 0;
+      }
+  },
+  this.shoot = function() {
+      if (isAlive) {
+          var fire = new FireballMonger(xPos, yPos, drLast);
+          fireBalls.push(fire);
+          shotsFired ++;
+          document.getElementById("b5").innerHTML = "Fireballs shot: " + shotsFired;
+      }
+  },
+  this.update = function() {
+    var newCurrentTime = Date.now();
+
+    if (typeof currentTime != "undefined") {
+      deltaTime = newCurrentTime - currentTime;
+      if (once === false) {
+        console.log(`deltaTime: ${deltaTime}`);
+        once = true;
+      }
+    }
+    // Should I use window.lastUpdate instead?
+
+    currentTime = newCurrentTime;
+
+    var now = + new Date;
+    if (window.lastUpdate) {
+    }
+    window.lastUpdate = now;
+
+    var enemyPos = enemy1.getCoordinates();
+    var isFalling = getIsFalling(enemyPos, xPos, yPos);
+
+    if (isFalling) {
+      monger.fall();
+    }
+    else {
+      var groundHeight = ground(xPos);
+      var futureGroundHeight = ground(xPos + dx / 100);
+
+      var isOnEnemy = yPos === enemyPos.y;
+      var groundNotUphillAhead = futureGroundHeight >= groundHeight;
+      var shouldGoLateral = isOnEnemy ||groundNotUphillAhead && dx != 0;
+      var shouldGoUpHill = dx != 0 && futureGroundHeight  < groundHeight && isAlive && isOnEnemy === false;
+
+      if (shouldGoUpHill) {
+        uphill(dx);
+      }
+      else if (shouldGoLateral) {
+        moveLateral(dx)
+      }
+      else if (yPos > groundHeight) //This is a last resort and means something went wrong
+      {
+        yPos = groundHeight;
+      }
+    }
+
+    var shouldUpdateHeroAnimationFrame = counter === 0 && isFalling === false && isAlive;
+    if (shouldUpdateHeroAnimationFrame)
+    {
+        if (dx > 0)
         {
-            return xPos;
-        },
-        y: function()
+           heroImg.src = rightCycle[animationIndex];
+        }
+        else if (dx < 0)
         {
-            return yPos;
-        },
-
-        fall: function() {
-          if (yCount === 0) //not sure why this is necessary
-          {
-              dy = g * (.2 * t + 1) - v0y;
-              t ++;
-          }
-
-          yCount = (yCount + 1) % yCountInterval;
-
-          xPos += dr;
-          yPos += dy;
-
-          var enemyPosition = enemy1.getCoordinates();
-          var enemyY = enemyPosition.y;
-
-          var isLanding = getIsLanding(xPos, yPos, aboveEnemy, enemyPosition);
-          aboveEnemy = getAboveEnemy(enemyPosition, xPos, yPos)
-
-          var groundHeight = ground(xPos);
-          var isBelowGround = yPos >= groundHeight;
-
-          if (isLanding) {
-            yPos = enemyY;
-          }
-
-          if (isLanding || isBelowGround) {
-            t = 0;
-            v0y = 0;
-          }
-
-          if (isBelowGround) {
-            yPos = groundHeight;
-          }
-        },
-
-        moveLeft: function() {
-          var enemyPos = enemy1.getCoordinates();
-          var isFalling = getIsFalling(enemyPos, xPos, yPos);
-          var onGround = !isFalling;
-
-          var isAbleToMoveLeft = onGround  && isAlive;
-            if (isAbleToMoveLeft)
-            {
-              dr = -xVelocity * deltaTime;
-              drLast = dr;
-            }
-        },
-         moveRight: function() {
-          var enemyPos = enemy1.getCoordinates();
-          var isFalling = getIsFalling(enemyPos, xPos, yPos);
-          var onGround = !isFalling;
-
-          var isAbleToMoveRight = onGround && isAlive;
-            if (isAbleToMoveRight)
-            {
-                dr = xVelocity * deltaTime;
-                drLast = dr;
-            }
-        },
-        jump: function() {
-            v0y = 15;
-            if (isAlive) {
-              yCount = 0;
-              monger.fall();
-            }
-        },
-        stop: function() {
-            if (isAlive)
-            {
-                dr = 0;
-            }
-        },
-
-        shoot: function()
-        {
-            if (isAlive)
-            {
-                var fire = FireballMonger(xPos, yPos, drLast);
-                fireBalls.push(fire);
-                shotsFired ++;
-                document.getElementById("b5").innerHTML = "Fireballs shot: " + shotsFired;
-            }
-        },
-        update: function() {
-          var newCurrentTime = Date.now();
-
-          if (typeof currentTime != "undefined") {
-            deltaTime = newCurrentTime - currentTime;
-            if (once === false) {
-              console.log(`deltaTime: ${deltaTime}`);
-              once = true;
-            }
-          }
-          // Should I use window.lastUpdate instead?
-
-          currentTime = newCurrentTime;
-
-          var now = + new Date;
-          if (window.lastUpdate) {
-          }
-          window.lastUpdate = now;
-
-          var enemyPos = enemy1.getCoordinates();
-          var isFalling = getIsFalling(enemyPos, xPos, yPos);
-
-          if (isFalling) {
-            monger.fall();
-          }
-          else {
-            var groundHeight = ground(xPos);
-            var futureGroundHeight = ground(xPos + dr / 100);
-
-            var isOnEnemy = yPos === enemyPos.y;
-            var groundNotUphillAhead = futureGroundHeight >= groundHeight;
-            var shouldGoLateral = isOnEnemy ||groundNotUphillAhead && dr != 0;
-            var shouldGoUpHill = dr != 0 && futureGroundHeight  < groundHeight && isAlive && isOnEnemy === false;
-
-            if (shouldGoUpHill) {
-              uphill();
-            }
-            else if (shouldGoLateral) {
-              moveLateral()
-            }
-            else if (yPos > groundHeight) //This is a last resort and means something went wrong
-            {
-              yPos = groundHeight;
-            }
-          }
-
-            if (counter === 0 && t === 0 && isAlive)
-            {
-                if (dr > 0)
-                {
-                   heroImg.src = rightCycle[animationIndex];
-                }
-                else if (dr < 0)
-                {
-                   heroImg.src = leftCycle[animationIndex];
-                }
-            }
-            counter = (counter + 1) % counterInterval;
-            animationIndex = (animationIndex + 1) % leftCycle.length;
+           heroImg.src = leftCycle[animationIndex];
         }
     }
+    counter = (counter + 1) % counterInterval;
+    animationIndex = (animationIndex + 1) % leftCycle.length;
+  }
 }
 function ground(xPos)
 {
@@ -609,7 +598,7 @@ function xFinder(dy, yNow)
 {
     for (var f = 0; f <= 800; f ++)
     {
-        var m = dy / dr;
+        var m = dy / dx;
         var b = yNow - (m * xPos)
 
         var y = m *(xPos + f / 100) + b;

@@ -1,18 +1,18 @@
 console.log("enemy js file");
-var Enemy = function(x, y) {
-var w = 50;
-var h = 50;
+function Enemy(x, y) {
+  var w = 50;
+  var h = 50;
 
-var pos ={
-  x,
-  y,
-  w,
-  h
-};
+  var pos ={
+    x,
+    y,
+    w,
+    h
+  };
 
-var speed = 5;
-var threshold = speed + 1;
-var exploded = false;
+  var speed = 5;
+  var threshold = speed + 1;
+  var exploded = false;
 
     function direction(coordinate, mongerCoordinate)
     {
@@ -27,46 +27,45 @@ var exploded = false;
             return 0;
         }
     }
-    return {
 
-        update: function(mongerX, mongerY)
+
+    this.update = function(mongerX, mongerY)
+    {
+        var directionX = direction(pos.x, mongerX);
+        var directionY = direction(pos.y, mongerY);
+
+        if (exploded === false)
         {
-            var directionX = direction(pos.x, mongerX);
-            var directionY = direction(pos.y, mongerY);
+            pos.x += speed * directionX;
+            pos.y += speed * directionY;
 
-            if (exploded === false)
+            if (directionX < 0)
             {
-                pos.x += speed * directionX;
-                pos.y += speed * directionY;
-
-                if (directionX < 0)
-                {
-                    enemyImg.src = enemyPicLeftFilePath;
-                }
-                else if (directionX > 0)
-                {
-                    enemyImg.src = enemyPicRightFilePath;
-                }
-                if (Math.abs(pos.x - mongerX) <= threshold && (Math.abs(pos.y - mongerY) <= threshold))
-                {
-                    died();
-                }
+                enemyImg.src = enemyPicLeftFilePath;
             }
-            if (mapCounter === 0) //This needs to be done better
+            else if (directionX > 0)
             {
-                context.drawImage(enemyImg, pos.x - .5 * pos.h, pos.y - .5 * pos.w, pos.w, pos.h);
+                enemyImg.src = enemyPicRightFilePath;
             }
-        },
-        getCoordinates:function(){
-            return pos;
-        },
-        died:function(){
-            exploded=true;
-            enemyImg.src=boomFilePath;
-        },
-        deadStatus: function(){
-
-            return exploded;
+            if (Math.abs(pos.x - mongerX) <= threshold && (Math.abs(pos.y - mongerY) <= threshold))
+            {
+                died();
+            }
         }
+        if (mapCounter === 0) //This needs to be done better
+        {
+            context.drawImage(enemyImg, pos.x - .5 * pos.h, pos.y - .5 * pos.w, pos.w, pos.h);
+        }
+    },
+    this.getCoordinates = function(){
+        return pos;
+    },
+    this.died = function() {
+        exploded=true;
+        enemyImg.src=boomFilePath;
+    },
+    this.deadStatus = function() {
+
+        return exploded;
     }
 }
