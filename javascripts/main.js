@@ -1,4 +1,4 @@
-var g = 10;
+var g = 2;
 const DEBUG_MODE = true;
 var heroWalkLeftFilePath = "images/walking_left.jpg";
 var heroWalkRightFilePath = "images/walking_right.jpg";
@@ -6,7 +6,7 @@ var heroStandRightFilePath = "images/standing_right.jpg";
 var heroStandLeftFilePath = "images/standing_left.jpg";
 var enemyPicRightFilePath = "images/enemy_right.bmp";
 var enemyPicLeftFilePath = "images/enemy_left.bmp";
-var boomFilePath = "images/boom.jpg";
+var boomFilePath = "images/boom.png";
 var deadLeftFilePath = "images/dead_left.jpg";
 var spikesFilePath = "images/spikes_transparent.png";
 var coinFilePath = "images/coin.jpg";
@@ -39,11 +39,10 @@ var dr = 0;
 var drLast = -3;
 var fireBalls = [];
 var enemyBalls = [];
-var aliveStatus = "alive";
+var isAlive = true;
 var spikeLeft = 300;
 
 var dontFall = false;
-var mAboveE = false;
 var haveCoin = false;
 var treeFalling = false;
 
@@ -51,9 +50,10 @@ var mapCounter = 0;
 var coinAmount = 0;
 var coinLeft = 650;
 var coinTop = 100;
-var drValue = 3;
+var xVelocity = .18;
+
 var yCount = 0;
-var yCountInterval = 2;
+var yCountInterval = 1;
 var PI = Math.PI;
 var TAU = 2 * PI;
 var treeTheta = 0;
@@ -85,8 +85,11 @@ var duck = {
   w: 300,
   h: 150
 };
+var mongerImg = {
+    width: 100,
+    height: 100
+  };
 
-var dyPrime = null;
 var map1 = [
   {x: 0, y: 150},
   {x: 500, y: 150},
@@ -140,14 +143,52 @@ myInterval = setInterval(updateEverything, 1000 / 60);
 
 function updateEverything() {
   monger.update();
+  context.clearRect(0, 0, 2 * canvas.width, 2 * canvas.height);
+  var herox = monger.x();
+  var heroY = monger.y();
+  context.drawImage(heroImg, herox - .5 * mongerImg.width, heroY - mongerImg.height, mongerImg.width, mongerImg.height);
+  updateFireBalls();
+  updateEnemyBalls(herox, heroY);
+  updateMapCounter();
+  drawLevel();
+  intersection();
+  $("#coinHeader").text("Coins you have : " + coinAmount);
+}
+
+function updateMapCounter() {
+  if (xPos < 0) {
+    if (mapCounter < heightObjs.length - 1) {
+      mapCounter ++;
+      xPos = canvas.width;
+    }
+    else {
+        dr = 0;
+        $("#loseHeadline").text("You win!!!");
+    }
+  }
+  else if (xPos > canvas.width) {
+    if (mapCounter != 0) {
+      mapCounter --;
+      xPos = 0;
+    }
+  else if (mapCounter === 0) {
+    dr = 0;
+    }
+  }
+}
+
+function updateEnemyBalls(herox, heroY) {
+  for (key in enemyBalls)
+  {
+    enemyBalls[key].update(herox, heroY);
+  }
+}
+
+function updateFireBalls() {
   for (key in fireBalls)
   {
     fireBalls[key].update();
   }
-
-  drawLevel();
-  intersection();
-  $("#coinHeader").text("Coins you have : " + coinAmount);
 }
 
 function HeightObj(map, mapFunction) {
@@ -179,7 +220,7 @@ function map1Func() {
     var xHeroPosition = monger.x();
     var yHeroPosition = monger.y();
     var xIsInSpike = xHeroPosition > spikeLeft && xHeroPosition < spikeLeft + 100
-    var yIsInSpike = yHeroPosition <= ground() && yHeroPosition >= ground() - 100
+    var yIsInSpike = yHeroPosition <= ground(xPos) && yHeroPosition >= ground(xPos) - 100
     var isInSpike = xIsInSpike && yIsInSpike;
 
     if (isInSpike)
@@ -195,7 +236,7 @@ function map2Func() {
   var xHeroPosition = monger.x();
   var yHeroPosition = monger.y();
   var xIsInSpike = xHeroPosition > spikeLeft && xHeroPosition < spikeLeft + 100
-  var yIsInSpike = yHeroPosition<= ground() && yHeroPosition >= ground() - 100
+  var yIsInSpike = yHeroPosition<= ground(xPos) && yHeroPosition >= ground(xPos) - 100
   var isInSpike = xIsInSpike && yIsInSpike;
 
   if (isInSpike)
@@ -271,7 +312,7 @@ function treeFall()
 function died()
 {
   heroImg.src = deadLeftFilePath;
-  aliveStatus = "dead";
+  isAlive = false;
   $("#loseHeadline").text("YOU LOSE!!!!!!!");
 }
 
@@ -291,10 +332,53 @@ function drawLevel()
           context.closePath();
       }
   }
-  document.getElementById("b4").innerHTML = monger.x();
+  var roundedxPos = Math.round(xPos);
+  document.getElementById("b4").innerHTML = roundedxPos;
+
   if (currentFunction) {
     currentFunction();
   }
+}
+
+function getAboveEnemy(enemyPosition, xPos, yPos) {
+  var enemyx = enemyPosition.x;
+  var enemyY = enemyPosition.y;
+  var enemyW = enemyPosition.w;
+
+  var yAboveEnemy = yPos - enemyY < 0;
+  var xWithinEnemy = Math.abs(xPos - enemyx) < enemyW;
+  var enemyIsDead = enemy1.deadStatus();
+
+  var aboveEnemy = yAboveEnemy && xWithinEnemy && enemyIsDead;
+  return aboveEnemy;
+}
+
+function getIsLanding(xPos, yPos, aboveEnemy, enemyPosition) {
+  var enemyx = enemyPosition.x;
+  var enemyY = enemyPosition.y;
+  var enemyW = enemyPosition.w;
+  var yBelowEnemy = yPos - enemyY >= 0;
+  var xWithinEnemy = Math.abs(xPos - enemyx) < enemyW;
+  var enemyIsDead = enemy1.deadStatus();
+  var enemyIsInLevel = mapCounter === 0; // This is a bad solution
+
+  var onEnemy = yBelowEnemy && xWithinEnemy && enemyIsDead && aboveEnemy && enemyIsInLevel;
+  return onEnemy;
+}
+
+function getIsFalling(enemyPosition, xPos, yPos) {
+  var enemyx = enemyPosition.x;
+  var enemyY = enemyPosition.y;
+  var enemyW = enemyPosition.w;
+
+  var heroOnEnemyY = yPos - enemyY === 0;
+  var heroWithInEnemyWidth = Math.abs(xPos - enemyx) < enemyW;
+  var enemyIsDead = enemy1.deadStatus();
+  var onTheEnemy = heroOnEnemyY && heroWithInEnemyWidth && enemyIsDead;
+  var belowGround = yPos >= ground(xPos);
+  var isOnSomething = belowGround || onTheEnemy;
+  var isFalling = !isOnSomething;
+  return isFalling;
 }
 
 function IronMonger() {
@@ -302,33 +386,34 @@ function IronMonger() {
   var v0y = 0;
   var t = 0;
   var yPos = 100;
-  var status = "above";
-  var dxPrime = 0;
-
-  var mongerImg = {
-    width: 100,
-    height: 100
-  };
   var shotsFired = 0;
-  var onEnemy = false;
-  var angle = 0;
-
+   onEnemy = false;
   var once = false;
+  var aboveEnemy = false;
 
   function uphill()
   {
-    var deltaVertGround = groundSpecific(xPos + dr) - yPos;
-    var speedCache = Math.sqrt(dr * dr + deltaVertGround * deltaVertGround);
+    var deltaVertGround = ground(xPos + dr) - yPos;
+    var speedCache = Math.hypot(dr, deltaVertGround);
     var magnitude = Math.abs(dr);
 
-    dxPrime = dr * magnitude / speedCache;
-    dyPrime = deltaVertGround * magnitude / speedCache;
+    var dxPrime = dr * magnitude / speedCache;
+    var dyPrime = deltaVertGround * magnitude / speedCache;
 
     xPos += dxPrime;
-    yPos += dyPrime;
-    dyPrime = 0;
 
-   console.log(dyPrime);
+    var newGroundHeight = ground(xPos);
+
+    if ((yPos + dyPrime).toFixed(11) === newGroundHeight.toFixed(11)) {
+
+      yPos = newGroundHeight;
+    }
+    else {
+      yPos += dyPrime;
+    }
+
+    // console.log(yPos + dyPrime === newGroundHeight, (yPos + dyPrime).toFixed(11) === newGroundHeight.toFixed(11));
+
   }
 
     function moveLateral ()
@@ -347,84 +432,73 @@ function IronMonger() {
         },
 
         fall: function() {
+          if (yCount === 0) //not sure why this is necessary
+          {
+              dy = g * (.2 * t + 1) - v0y;
+              t ++;
+          }
 
-            if (status != "end")
-            {
-                if (yCount === 0)
-                {
-                    dy = g * (.2 * t + 1) - v0y;
-                    t ++;
-                }
+          yCount = (yCount + 1) % yCountInterval;
 
-                yCount = (yCount + 1) % yCountInterval;
+          xPos += dr;
+          yPos += dy;
 
-                xPos += dr;
-                yPos += dy / 2 ;
+          var enemyPosition = enemy1.getCoordinates();
+          var enemyY = enemyPosition.y;
 
-                if (yPos - enemy1.getCoordinates().y < 0)
-                {
-                    mAboveE = true;
-                    onEnemy = false;
-                }
-                else if (yPos - enemy1.getCoordinates().y > 0)
-                {
-                  if ((Math.abs(xPos - enemy1.getCoordinates().x) < enemy1.getCoordinates().w) && enemy1.deadStatus() === true)
-                  {
-                      if (mAboveE)
-                      {
-                          t = 0;
-                          status = "end";
-                          onEnemy = true;
-                      }
-                      else {
-                        onEnemy = false;
-                      }
-                  }
-                  mAboveE = false;
-                }
+          var isLanding = getIsLanding(xPos, yPos, aboveEnemy, enemyPosition);
+          aboveEnemy = getAboveEnemy(enemyPosition, xPos, yPos)
 
-             if (yPos >= ground())
-                {
-                    if (status === "above")
-                    {
-                        yPos = ground();
-                        t = 0;
-                        status = "end";
-                    }
-                }
-                else if (yPos <= ground())
-                {
-                    status = "above";
-                }
-            }
+          var groundHeight = ground(xPos);
+          var isBelowGround = yPos >= groundHeight;
+
+          if (isLanding) {
+            yPos = enemyY;
+          }
+
+          if (isLanding || isBelowGround) {
+            t = 0;
+            v0y = 0;
+          }
+
+          if (isBelowGround) {
+            yPos = groundHeight;
+          }
         },
 
         moveLeft: function() {
-            if (t === 0 && aliveStatus === "alive")
+          var enemyPos = enemy1.getCoordinates();
+          var isFalling = getIsFalling(enemyPos, xPos, yPos);
+          var onGround = !isFalling;
+
+          var isAbleToMoveLeft = onGround  && isAlive;
+            if (isAbleToMoveLeft)
             {
-                dr = -drValue;
-                drLast = dr;
+              dr = -xVelocity * deltaTime;
+              drLast = dr;
             }
         },
          moveRight: function() {
-            if (t === 0 && aliveStatus === "alive")
+          var enemyPos = enemy1.getCoordinates();
+          var isFalling = getIsFalling(enemyPos, xPos, yPos);
+          var onGround = !isFalling;
+
+          var isAbleToMoveRight = onGround && isAlive;
+            if (isAbleToMoveRight)
             {
-                dr = drValue;
+                dr = xVelocity * deltaTime;
                 drLast = dr;
             }
         },
         jump: function() {
-            v0y = 40;
-            status = "above";
-
-            if (aliveStatus === "alive")
-            {
-                yCount = 0;
-                monger.fall();
+            v0y = 15;
+            if (isAlive) {
+              yCount = 0;
+              monger.fall();
             }
         },
         stop: function() {
-            if (aliveStatus === "alive")
+            if (isAlive)
             {
                 dr = 0;
             }
@@ -432,7 +506,7 @@ function IronMonger() {
 
         shoot: function()
         {
-            if (aliveStatus === "alive")
+            if (isAlive)
             {
                 var fire = FireballMonger(xPos, yPos, drLast);
                 fireBalls.push(fire);
@@ -440,7 +514,6 @@ function IronMonger() {
                 document.getElementById("b5").innerHTML = "Fireballs shot: " + shotsFired;
             }
         },
-
         update: function() {
           var newCurrentTime = Date.now();
 
@@ -450,72 +523,44 @@ function IronMonger() {
               console.log(`deltaTime: ${deltaTime}`);
               once = true;
             }
-
-
           }
-
+          // Should I use window.lastUpdate instead?
 
           currentTime = newCurrentTime;
 
+          var now = + new Date;
+          if (window.lastUpdate) {
+          }
+          window.lastUpdate = now;
 
+          var enemyPos = enemy1.getCoordinates();
+          var isFalling = getIsFalling(enemyPos, xPos, yPos);
 
+          if (isFalling) {
+            monger.fall();
+          }
+          else {
+            var groundHeight = ground(xPos);
+            var futureGroundHeight = ground(xPos + dr / 100);
 
+            var isOnEnemy = yPos === enemyPos.y;
+            var groundNotUphillAhead = futureGroundHeight >= groundHeight;
+            var shouldGoLateral = isOnEnemy ||groundNotUphillAhead && dr != 0;
+            var shouldGoUpHill = dr != 0 && futureGroundHeight  < groundHeight && isAlive && isOnEnemy === false;
 
-            var now = + new Date;
-            if (dr != 0)
-            {
-                console.log(groundSpecific(xPos + dr / 10) < ground());
-                console.log("future ", groundSpecific(xPos + dr / 10), "current ", ground());
+            if (shouldGoUpHill) {
+              uphill();
             }
-            if (window.lastUpdate)
-            {
-               // console.log(now - window.lastUpdate);
+            else if (shouldGoLateral) {
+              moveLateral()
             }
-            window.lastUpdate = now;
-
-            if (onEnemy)
+            else if (yPos > groundHeight) //This is a last resort and means something went wrong
             {
-                if(Math.abs(xPos - enemy1.getCoordinates().x) < enemy1.getCoordinates().w)
-                {
-                    moveLateral();
-                }
-                else
-                {
-                    onEnemy = false;
-                }
+              yPos = groundHeight;
             }
-            else if (onEnemy != true)
-            {
-                if (t === 0)
-                {
-                    //if(dr != 0 && groundSpecific(xPos + dr) <= ground() && aliveStatus != "dead" && dyPrime <= 0)
-                    if (dr != 0 && groundSpecific(xPos + dr / 100) < ground() && aliveStatus != "dead" && dyPrime <= 0)
-                    {
-                        uphill();
-                    }
+          }
 
-                    //else if (dr != 0 && yPos === ground() && groundSpecific(xPos + dr)>ground())
-                    else if (dr != 0 && yPos === ground() && groundSpecific(xPos + dr / 100) >= ground())
-                    {
-                      moveLateral();
-                      dyPrime = 0 ;
-                    }
-
-                    else if (yPos != ground())
-                    {
-                      v0y = 0 ;
-                      status = "above";
-                      monger.fall();
-                      dyPrime = 0 ;
-                    }
-                }
-                else if (t != 0)
-                {
-                    monger.fall();
-                }
-            }
-
-            if (counter === 0 && t === 0 && aliveStatus != "dead")
+            if (counter === 0 && t === 0 && isAlive)
             {
                 if (dr > 0)
                 {
@@ -528,62 +573,16 @@ function IronMonger() {
             }
             counter = (counter + 1) % counterInterval;
             animationIndex = (animationIndex + 1) % leftCycle.length;
-
-            var tx = xPos + .5 * mongerImg.width;
-            var ty = yPos;
-            angle += .01
-
-            context.clearRect(0, 0, 2 * canvas.width, 2 * canvas.height);
-            /*
-            context.translate(tx, ty);
-            context.rotate(angle);
-            context.drawImage(heroImg,-.5 * mongerImg.width,-.5 * mongerImg.height, mongerImg.width, mongerImg.height);
-            context.rotate(-angle);
-            context.translate(-tx,-ty);
-            */
-            context.drawImage(heroImg, xPos - .5 * mongerImg.width, yPos - mongerImg.height, mongerImg.width, mongerImg.height);
-
-            for (key in enemyBalls)
-            {
-                enemyBalls[key].update(xPos, yPos);
-            }
-
-            if (xPos < 0)
-            {
-                if (mapCounter < heightObjs.length - 1)
-                {
-                    mapCounter ++;
-                    xPos = canvas.width;
-                }
-                else
-                {
-                    dr = 0;
-                    $("#loseHeadline").text("You win!!!");
-                }
-
-            }
-            else if (xPos > canvas.width)
-            {
-                if (mapCounter != 0)
-                {
-                    mapCounter --;
-                    xPos = 0;
-                }
-                else if (mapCounter === 0)
-                {
-                    dr = 0;
-                }
-            }
         }
     }
 }
-function ground()
+function ground(xPos)
 {
     var n = 0 ;
     if (mapCounter < heightObjs.length)
     {
         var heighty = heightObjs[mapCounter].map;
-        if(xPos < heighty[0].x)
+        if (xPos < heighty[0].x)
         {
             return  -1 * heighty[0].y + canvas.height;
         }
@@ -601,7 +600,8 @@ function ground()
 
     var m = (heighty[n + 1].y - heighty[n].y) / (heighty[n + 1].x - heighty[n].x);
     var b = heighty[n + 1].y - (m * heighty[n + 1].x);
-    return canvas.height - (m * xPos) - b;
+    var calculatedGround = canvas.height - (m * xPos) - b;
+    return calculatedGround;
     }
 }
 
@@ -614,21 +614,12 @@ function xFinder(dy, yNow)
 
         var y = m *(xPos + f / 100) + b;
 
-        if (y >= groundSpecific(xPos + f / 100))
+        if (y >= ground(xPos + f / 100))
         {
             return y;
             break;
         }
     }
-}
-
-function groundSpecific(var1)
-{
-    xInitial = xPos;
-    xPos = var1;
-    groundCalculated = ground();
-    xPos = xInitial;
-    return groundCalculated;
 }
 
 function intersection()
