@@ -1,4 +1,4 @@
-var g = 2;
+var g = .4;
 const DEBUG_MODE = true;
 var heroWalkLeftFilePath = "images/walking_left.jpg";
 var heroWalkRightFilePath = "images/walking_right.jpg";
@@ -32,15 +32,10 @@ var animationIndex = 0;
 var counter = 0;
 var counterInterval = 5 ;
 var xPos = 900;
-var initialvelocity = 40;
-var groundCurrent = 0 ;
-var dx = 0;
-var drLast = -3;
 var fireBalls = [];
 var enemyBalls = [];
 var isAlive = true;
 var spikeLeft = 300;
-
 var dontFall = false;
 var haveCoin = false;
 var treeFalling = false;
@@ -49,10 +44,8 @@ var mapCounter = 0;
 var coinAmount = 0;
 var coinLeft = 650;
 var coinTop = 100;
-var xVelocity = .18;
+var xSpeed = .18;
 
-var yCount = 0;
-var yCountInterval = 1;
 var PI = Math.PI;
 var TAU = 2 * PI;
 var treeTheta = 0;
@@ -352,7 +345,7 @@ function getAboveEnemy(enemyPosition, xPos, yPos) {
   return aboveEnemy;
 }
 
-function getIsLanding(xPos, yPos, aboveEnemy, enemyPosition) {
+function getIsLandingOnPlatform(xPos, yPos, aboveEnemy, enemyPosition) {
   var enemyx = enemyPosition.x;
   var enemyY = enemyPosition.y;
   var enemyW = enemyPosition.w;
@@ -370,8 +363,10 @@ function getIsFalling(enemyPosition, xPos, yPos) {
   var enemyY = enemyPosition.y;
   var enemyW = enemyPosition.w;
 
-  var heroOnEnemyY = yPos - enemyY === 0;
-  var heroWithInEnemyWidth = Math.abs(xPos - enemyx) < enemyW;
+  var heroOnEnemyY = yPos === enemyY;
+  var xDifference = xPos - enemyx;
+  var xAbsoluteDifference = Math.abs(xDifference);
+  var heroWithInEnemyWidth = xAbsoluteDifference < enemyW;
   var enemyIsDead = enemy1.deadStatus();
   var onTheEnemy = heroOnEnemyY && heroWithInEnemyWidth && enemyIsDead;
   var belowGround = yPos >= ground(xPos);
@@ -381,29 +376,38 @@ function getIsFalling(enemyPosition, xPos, yPos) {
 }
 
 function IronMonger() {
-  var dy = 0;
   var v0y = 0;
+  var xVelocity = 0;
   var t = 0;
   var yPos = 100;
   var shotsFired = 0;
-   onEnemy = false;
+  var onEnemy = false;
   var once = false;
   var aboveEnemy = false;
+  var directionFacing = -1;
 
   function uphill(dr)
   {
     var deltaVertGround = ground(xPos + dr) - yPos;
-    var speedCache = Math.hypot(dr, deltaVertGround);
+    var originalHypotenuse = Math.hypot(dr, deltaVertGround);
     var magnitude = Math.abs(dr);
 
-    var dxPrime = dr * magnitude / speedCache;
-    var dyPrime = deltaVertGround * magnitude / speedCache;
+    var cosTheta = magnitude / originalHypotenuse;
+    var sinTheta = deltaVertGround / originalHypotenuse;
+
+    var dxPrime = dr * cosTheta;
+    var dyPrime = magnitude * sinTheta;
 
     xPos += dxPrime;
 
     var newGroundHeight = ground(xPos);
+    var yNewPosition = yPos + dyPrime;
+    var yNewPositionRounded = yNewPosition.toFixed(11);
+    var newGroundHeightRounded = newGroundHeight.toFixed(11);
 
-    if ((yPos + dyPrime).toFixed(11) === newGroundHeight.toFixed(11)) {
+    var shouldChangePositionToNewGround = yNewPositionRounded === newGroundHeightRounded;
+
+    if (shouldChangePositionToNewGround) {
 
       yPos = newGroundHeight;
     }
@@ -417,21 +421,16 @@ function IronMonger() {
       xPos += dx;
   }
 
-    this.x = function() {
-        return xPos;
-    },
-    this.y = function() {
-        return yPos;
-    },
+  this.x = function() {
+      return xPos;
+  },
+  this.y = function() {
+      return yPos;
+  },
 
-    this.fall = function() {
-    if (yCount === 0) //not sure why this is necessary
-    {
-        dy = g * (.2 * t + 1) - v0y;
-        t ++;
-    }
-
-    yCount = (yCount + 1) % yCountInterval;
+  this.fall = function(dx) {
+    var dy = g * t - v0y;
+    t ++;
 
     xPos += dx;
     yPos += dy;
@@ -439,23 +438,21 @@ function IronMonger() {
     var enemyPosition = enemy1.getCoordinates();
     var enemyY = enemyPosition.y;
 
-    var isLanding = getIsLanding(xPos, yPos, aboveEnemy, enemyPosition);
+    var isLandingOnPlatform = getIsLandingOnPlatform(xPos, yPos, aboveEnemy, enemyPosition);
     aboveEnemy = getAboveEnemy(enemyPosition, xPos, yPos)
 
     var groundHeight = ground(xPos);
-    var isBelowGround = yPos >= groundHeight;
+    var isLandingOnGround = yPos >= groundHeight;
+    var isLanding = isLandingOnPlatform || isLandingOnGround;
 
     if (isLanding) {
-      yPos = enemyY;
-    }
-
-    if (isLanding || isBelowGround) {
       t = 0;
       v0y = 0;
-    }
+      var yNewPos = isLandingOnPlatform ?
+        enemyY :
+        groundHeight;
 
-    if (isBelowGround) {
-      yPos = groundHeight;
+      yPos = yNewPos;
     }
   },
 
@@ -465,10 +462,9 @@ function IronMonger() {
     var onGround = !isFalling;
 
     var isAbleToMoveLeft = onGround  && isAlive;
-      if (isAbleToMoveLeft)
-      {
-        dx = -xVelocity * deltaTime;
-        drLast = dx;
+      if (isAbleToMoveLeft) {
+        xVelocity = -xSpeed;
+        directionFacing = -1
       }
   },
    this.moveRight = function() {
@@ -477,27 +473,27 @@ function IronMonger() {
     var onGround = !isFalling;
 
     var isAbleToMoveRight = onGround && isAlive;
-      if (isAbleToMoveRight)
-      {
-          dx = xVelocity * deltaTime;
-          drLast = dx;
+      if (isAbleToMoveRight) {
+        xVelocity = xSpeed;
+        directionFacing = 1
       }
   },
   this.jump = function() {
-      v0y = 15;
       if (isAlive) {
-        yCount = 0;
-        monger.fall();
+        v0y = 12;
+        var dx = xVelocity * deltaTime;
+        monger.fall(dx);
       }
   },
   this.stop = function() {
       if (isAlive) {
           dx = 0;
+          xVelocity = 0;
       }
   },
   this.shoot = function() {
       if (isAlive) {
-          var fire = new FireballMonger(xPos, yPos, drLast);
+          var fire = new FireballMonger(xPos, yPos, directionFacing);
           fireBalls.push(fire);
           shotsFired ++;
           document.getElementById("b5").innerHTML = "Fireballs shot: " + shotsFired;
@@ -513,6 +509,12 @@ function IronMonger() {
         once = true;
       }
     }
+    var dx = 0;
+
+    if (typeof deltaTime != "undefined") {
+      dx = xVelocity * deltaTime;
+    }
+
     // Should I use window.lastUpdate instead?
 
     currentTime = newCurrentTime;
@@ -526,7 +528,7 @@ function IronMonger() {
     var isFalling = getIsFalling(enemyPos, xPos, yPos);
 
     if (isFalling) {
-      monger.fall();
+      monger.fall(dx);
     }
     else {
       var groundHeight = ground(xPos);
