@@ -1,4 +1,6 @@
 var g = .4;
+const PI = Math.PI;
+const TAU = 2 * PI;
 const DEBUG_MODE = true;
 var heroWalkLeftFilePath = "images/walking_left.jpg";
 var heroWalkRightFilePath = "images/walking_right.jpg";
@@ -8,12 +10,12 @@ var enemyPicRightFilePath = "images/enemy_right.bmp";
 var enemyPicLeftFilePath = "images/enemy_left.bmp";
 var boomFilePath = "images/boom.png";
 var deadLeftFilePath = "images/dead_left.jpg";
-var spikesFilePath = "images/spikes_transparent.png";
-var coinFilePath = "images/coin.jpg";
-var treeFilePath = "images/tree_transparent.png";
-var dockFilePath = "images/dock_transparent.png";
+var spikesFilePath = "images/spikes.png";
+var coinFilePath = "images/coin.png";
+var treeFilePath = "images/tree.png";
+var dockFilePath = "images/dock.png";
 var oceanFilePath = "images/ocean.jpg";
-var duckFilePath = "images/duck_boat_transparent.png";
+var duckFilePath = "images/duck_boat.png";
 
 var canvas = document.getElementById("c");
 var canvasMargin = 18;
@@ -46,8 +48,6 @@ var coinLeft = 650;
 var coinTop = 100;
 var xSpeed = .18;
 
-var PI = Math.PI;
-var TAU = 2 * PI;
 var treeTheta = 0;
 var tree = {
   x: 300,
@@ -235,10 +235,6 @@ function map2Func() {
   {
       died();
   }
-  if (haveCoin === false)
-  {
-      context.drawImage(imgCoin, coinLeft, coinTop, 50, 50);
-  }
 
   context.drawImage(imgSpike, spikeLeft, canvas.height - 250, 100, 100);
 }
@@ -378,6 +374,7 @@ function getIsFalling(enemyPosition, xPos, yPos) {
 function IronMonger() {
   var v0y = 0;
   var xVelocity = 0;
+  var yVelocity = 0;
   var t = 0;
   var yPos = 100;
   var shotsFired = 0;
@@ -386,9 +383,9 @@ function IronMonger() {
   var aboveEnemy = false;
   var directionFacing = -1;
 
-  function uphill(dr)
-  {
-    var deltaVertGround = ground(xPos + dr) - yPos;
+  function uphill(dr) {
+    var newOriginalHeight = ground(xPos + dr);
+    var deltaVertGround = newOriginalHeight - yPos;
     var originalHypotenuse = Math.hypot(dr, deltaVertGround);
     var magnitude = Math.abs(dr);
 
@@ -398,27 +395,9 @@ function IronMonger() {
     var dxPrime = dr * cosTheta;
     var dyPrime = magnitude * sinTheta;
 
-    xPos += dxPrime;
+    yPos += dyPrime;
 
-    var newGroundHeight = ground(xPos);
-    var yNewPosition = yPos + dyPrime;
-    var yNewPositionRounded = yNewPosition.toFixed(11);
-    var newGroundHeightRounded = newGroundHeight.toFixed(11);
-
-    var shouldChangePositionToNewGround = yNewPositionRounded === newGroundHeightRounded;
-
-    if (shouldChangePositionToNewGround) {
-
-      yPos = newGroundHeight;
-    }
-    else {
-      yPos += dyPrime;
-    }
-  }
-
-  function moveLateral(dx)
-  {
-      xPos += dx;
+    return dxPrime;
   }
 
   this.x = function() {
@@ -432,16 +411,15 @@ function IronMonger() {
     var dy = g * t - v0y;
     t ++;
 
-    xPos += dx;
     yPos += dy;
 
     var enemyPosition = enemy1.getCoordinates();
     var enemyY = enemyPosition.y;
 
-    var isLandingOnPlatform = getIsLandingOnPlatform(xPos, yPos, aboveEnemy, enemyPosition);
-    aboveEnemy = getAboveEnemy(enemyPosition, xPos, yPos)
+    var isLandingOnPlatform = getIsLandingOnPlatform(xPos + dx, yPos, aboveEnemy, enemyPosition);
+    aboveEnemy = getAboveEnemy(enemyPosition, xPos + dx, yPos)
 
-    var groundHeight = ground(xPos);
+    var groundHeight = ground(xPos + dx);
     var isLandingOnGround = yPos >= groundHeight;
     var isLanding = isLandingOnPlatform || isLandingOnGround;
 
@@ -454,6 +432,7 @@ function IronMonger() {
 
       yPos = yNewPos;
     }
+    return dy;
   },
 
   this.moveLeft = function() {
@@ -480,7 +459,7 @@ function IronMonger() {
   },
   this.jump = function() {
       if (isAlive) {
-        v0y = 12;
+        v0y = 12.3;
         var dx = xVelocity * deltaTime;
         monger.fall(dx);
       }
@@ -510,9 +489,12 @@ function IronMonger() {
       }
     }
     var dx = 0;
+    var dy = 0;
 
     if (typeof deltaTime != "undefined") {
       dx = xVelocity * deltaTime;
+      // dx = xVelocity === 0 ? 0 //This is for debugging
+      //   : xVelocity > 0 ? 3 : -3;
     }
 
     // Should I use window.lastUpdate instead?
@@ -525,31 +507,44 @@ function IronMonger() {
     window.lastUpdate = now;
 
     var enemyPos = enemy1.getCoordinates();
+
+    var notOnGroundExactly = yPos != groundHeight;
+    if (notOnGroundExactly) {
+      var yPositionRounded = yPos.toFixed(11);
+      var groundHeight = ground(xPos);
+      var groundHeightRounded = groundHeight.toFixed(11);
+
+      var shouldChangePositionToNewGround = yPositionRounded === groundHeightRounded;
+
+      if (shouldChangePositionToNewGround) {
+        yPos = groundHeight;
+      }
+    }
+
     var isFalling = getIsFalling(enemyPos, xPos, yPos);
 
     if (isFalling) {
-      monger.fall(dx);
+      dy = monger.fall(dx);
     }
     else {
-      var groundHeight = ground(xPos);
       var futureGroundHeight = ground(xPos + dx / 100);
-
       var isOnEnemy = yPos === enemyPos.y;
       var groundNotUphillAhead = futureGroundHeight >= groundHeight;
       var shouldGoLateral = isOnEnemy ||groundNotUphillAhead && dx != 0;
       var shouldGoUpHill = dx != 0 && futureGroundHeight  < groundHeight && isAlive && isOnEnemy === false;
 
       if (shouldGoUpHill) {
-        uphill(dx);
+        dx = uphill(dx);
       }
       else if (shouldGoLateral) {
-        moveLateral(dx)
       }
       else if (yPos > groundHeight) //This is a last resort and means something went wrong
       {
         yPos = groundHeight;
       }
     }
+
+    xPos += dx;
 
     var shouldUpdateHeroAnimationFrame = counter === 0 && isFalling === false && isAlive;
     if (shouldUpdateHeroAnimationFrame)
@@ -637,14 +632,16 @@ function intersection()
         }
      }
 
-    if (Math.abs(coinLeft - monger.x()) <= threshold && (Math.abs(coinTop - monger.y()) <= threshold))
+    var xPosWithInCoin = Math.abs(coinLeft - monger.x()) <= threshold;
+    var yPosWithInCoin = Math.abs(coinTop - monger.y()) <= threshold
+    var posWithInCoin = xPosWithInCoin && yPosWithInCoin;
+    var shouldGetCoin2 = haveCoin === false && mapCounter === 0;
+    var shouldGetCoin = posWithInCoin && shouldGetCoin2
+    if (shouldGetCoin)
     {
-        if (haveCoin === false && mapCounter === 0)
-        {
-            $("#loseHeadline").text("GOT COIN!!!");
-            haveCoin = true;
-            coinAmount ++;
-        }
+        $("#loseHeadline").text("GOT COIN!!!");
+        haveCoin = true;
+        coinAmount ++;
     }
 }
 
